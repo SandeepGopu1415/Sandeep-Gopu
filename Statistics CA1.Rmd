@@ -285,24 +285,95 @@ p=f/sum(f);p
 mode=names(f)[which(f==max(f))]; mode
 c("prediction of region using multinomil distribution :", mode)
 ```
+#Question 3 
 
-
-
-
-y=table(N)
-y
-mode=names(y)[which(y==max(y))]
-mode
-data$gestation[is.na(data$gestation)]=mode
-data$life_span[is.na(data$life_span)]=mode
-X=data$body_wt
-m=mean(X)
-m
-data$non_dreaming[is.na(data$non_dreaming)]=m
-data$dreaming[is.na(data$dreaming)]=m
-data$total_sleep[is.na(data$total_sleep)]=m
+```{r}
+data = read.csv('mammals.csv')
 data
-var1=data$non_dreaming
-var2=data$total_sleep
-var3=data$gestation
-var4=data$exposure
+```
+
+# a) Consider two categorical variables of the dataset, develop a binary decision making strategy to check whether two variables are independent at the significant level alpha=0.01.  To do so,                                                                          
+i.    State the hypotheses.                                                            
+ii.   Find the statistic and critical values.                               
+iii.  Explain your decision and Interpret results.    
+
+```{r}
+
+X1 = data$exposure
+X2 = data$danger
+#H0 : exposure(X1) and danger(X2) are independent
+#H1 : exposure(X1) and danger(X2) are dependent
+F = table(X1,X2)
+c("Frequency:",F)
+E=matrix(NA,5,5);E
+x1=5; x2=5
+for(i in 1:x1){
+  for(j in 1:x2){
+    E[i,j]=sum(F[i,])*sum(F[,j])/nrow(data)
+  }
+}
+E
+alpha = 0.01
+test.value = sum((F-E)^2/E)
+c("Test value",test.value)
+c.value = qchisq(1-alpha,(4*4))
+c("C value",c.value)
+if(test.value<c.value){
+  c("H0 is accepted: X1 and X2 are independent")
+}else{
+ c("H0 is rejected: X1 and X2 are dependent") 
+}
+
+```
+
+# b) Consider one categorical variable, apply goodness of fit test to evaluate whether a candidate set of probabilities can be appropriate to quantify the uncertainty of class frequency at the significant level alpha=0.05.    
+
+```{r}
+X=data$predation
+#H0: p1=p2=p3=p4=p5=1/5
+#H1: not H0
+F = table(X) 
+c("Frequency",F)
+c("Probablity",F/sum(F))
+p0=rep(1/5,5);p0
+n=nrow(data)
+E=n*p0; 
+c("Expected value:",E)
+alpha=0.05
+test.value = sum((F-E)^2/E)
+c("Test Value:",test.value)
+c.value = qchisq(1-alpha,4)
+c("C value:",c.value)
+if(test.value<c.value){
+  c("H0 is accepted")
+}else{
+ c("H0 is rejected") 
+}
+```
+
+# c) Consider one continuous variable in the dataset, and apply test of mean for a proposed candidate of μ at the significant level alpha=0.05.                          
+
+```{r}
+X=data$body_wt
+#H0: mu < 3
+#H1: mu >= 3
+#upper one-sided test
+mu0=3
+alpha=0.05
+xbar=mean(X)
+s=sd(X)
+n=length(X)
+test.value=(xbar-mu0)/(s/sqrt(n))
+c("Test Value:",test.value)
+c.value=qnorm(1-alpha)
+c("C value:",c.value)
+if(test.value<c.value){
+  c("H0 is accepted")
+}else{
+ c("H0 is rejected") 
+}
+
+```
+
+
+
