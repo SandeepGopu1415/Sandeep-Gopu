@@ -1,0 +1,308 @@
+---
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+#########Sleep of Mammals############# 
+#(a) Describe the dataset using appropriate plots/curves/charts,...
+
+```{r}
+data=read.csv(file.choose())
+data
+
+```
+
+```{r}
+t=data$brain_wt
+plot(t,type='l',col=("Blue"))
+curve(x^4,from=10,to=-10)
+c=data$danger
+pie(table(c))
+barplot(table(c))
+
+```
+
+\#(b) Consider one of continuous attributes, and compute central and
+variational measures.
+
+```{r}
+N=data$exposure
+y=table(N)
+y
+mode=names(y)[which(y==max(y))]
+c("mode=",mode)
+
+```
+
+```{r}
+
+X=data$body_wt
+m=mean(X)
+c("mean=",m)
+
+
+```
+
+```{r}
+med=median(X)
+c("Median=",med)
+
+```
+
+```{r}
+s=sd(X)
+c("Standard deviation=",s)
+
+```
+
+#Data Normalization(Z-Score)
+
+```{r}
+Z=(X-m)/s
+Z
+
+```
+
+```{r}
+R=max(X)-min(X)
+R
+
+```
+
+#Scaling
+
+```{r}
+Y=(X-min(X))/R
+Y
+dh=data.frame(X,Y,Z)
+head(dh)
+colnames(dh)=c('body_wt','scaled body_wt','Normalized body_wt')
+head(dh)
+```
+
+\#(c) For a particular variable of the dataset, use Chebyshev's rule,
+and propose one-sigma interval. Based on your proposed interval, specify
+the outliers if any.
+
+```{r}
+L=mean(X)-sd(X); U=mean(X)+sd(X)
+c("Lower_bound=",L,"Upper_bound=",U)
+out=c()
+for(j in X){
+  if(j>U|j<L){o=j}else{o=NULL}
+  out=c(out,o)
+}
+c('Outliers=',out)
+```
+
+\#(d) Explain how the box-plot technique can be used to detect outliers.
+Apply this technique for one attribute of the dataset
+
+```{r}
+Q1=quantile(X,0.25);Q3=quantile(X,0.75)
+IQR=Q3-Q1
+IQR
+LW=Q1-1.5*IQR(X);UW=Q3+1.5*IQR(X)
+out=c()
+for(i in X){
+  if(i>UW|i<LW){o=i}else{o=NULL}
+  out=c(out,o)
+}
+c("Lower_bound=",LW,"Upper_bound=",UW)
+c("Outliers=",out)
+```
+
+#filling the NULL space
+
+```{r}
+N=data$exposure
+y=table(N)
+y
+mode=names(y)[which(y==max(y))]
+c("mode=",mode)
+data$gestation[is.na(data$gestation)]=mode
+data$life_span[is.na(data$life_span)]=mode
+X=data$body_wt
+m=mean(X)
+c("mean=",m)
+data$non_dreaming[is.na(data$non_dreaming)]=m
+data$dreaming[is.na(data$dreaming)]=m
+data$total_sleep[is.na(data$total_sleep)]=m
+data
+```
+
+########End of the First Question###########
+#    2a)Select four variables of the dataset, and propose an appropriate probability model to quantify uncertainty of each variable. 
+#b)	 For each model in part (a), estimate the parameters of model.     
+#c)	Express the way in which each model can be used for the predictive analytics, then find the prediction for each attribute.                              
+
+#Reading the dataset
+```{r}
+data=read.csv(file.choose())
+data
+
+```
+
+```{r}
+X=data$charges
+N=data$children
+J=data$bmi
+X=data$region
+```
+
+
+#Exponentional
+```{r}
+X=data$charges
+xbar=mean(X);xbar
+alpha=(xbar^2)/var(X);alpha
+lambda=xbar/var(X);lambda
+rexp(X,lambda)
+```
+```{r}
+L=mu-3*sigma; U=mu+3*sigma
+L;U
+j=seq(L,U,10);j
+pdf=dexp(j,lambda)
+pdf
+```
+
+```{r}
+plot(j,pdf,type='b',col='green',main='Exponantional',xlab='changed',ylab='prob density function')
+```
+
+```{r}
+cdf=pexp(j,lambda)
+cdf
+
+```
+
+```{r}
+plot(j,cdf,type='b',col='red',main='Exponantional',xlab='Charges',ylab='cumulative distribution function')
+```
+
+```{r}
+Predection=sum(dnorm(j,lambda))
+Predection
+```
+
+#Binomial Distribution
+```{r}
+N=data$children
+n=max(N);n
+p=mean(N)/n
+p
+```
+
+```{r}
+hyperparameters=rbinom(N,n,p)
+hyperparameters
+```
+
+
+```{r}
+# P(X=3)
+dbinom(3,n,p)
+# p(X<=5)
+pbinom(5,n,p)
+j=0:n;j
+#pmf
+pmf=dbinom(j,n,p)
+c(pmf)
+cdf=pbinom(j,n,p)
+c(cdf)
+```
+```{r}
+plot(j,cdf, type='b', col='skyblue')
+lines(j,pmf, type='b', col='green')
+```
+
+```{r}
+#  E(X)
+E=n*p
+E
+```
+
+```{r}
+Predection=sum(dbinom(j,n,p))
+Predection
+```
+#  Normal distribution
+```{r}
+J=data$bmi
+#parameter estimation
+mu=mean(J); sigma=sd(J)
+mu; sigma
+```
+
+```{r}
+rnorm(J,mu,sigma)
+```
+
+```{r}
+L=mu-2*sigma; U=mu+2*sigma
+L;U
+```
+
+```{r}
+j=seq(L,U,1);j
+```
+
+```{r}
+pdf=dnorm(j,mu,sigma)
+pdf
+
+```
+
+```{r}
+plot(j,pdf,type='b',col='green',main='normal pdf of bmi',xlab='bmi',ylab='prob density function')
+```
+
+```{r}
+cdf=pnorm(j,mu,sigma)
+cdf
+
+```
+
+```{r}
+plot(j,cdf,type='b',col='red',main='normal pdf of price',xlab='bmi',ylab='cumulative distribution function')
+```
+
+```{r}
+Predection=sum(dnorm(j,mu,sigma))
+Predection
+
+```
+# multinomil distribution 
+```{r}
+X=data$region
+f=table(X); f
+p=f/sum(f);p 
+```
+
+```{r}
+mode=names(f)[which(f==max(f))]; mode
+c("prediction of region using multinomil distribution :", mode)
+```
+
+
+
+
+y=table(N)
+y
+mode=names(y)[which(y==max(y))]
+mode
+data$gestation[is.na(data$gestation)]=mode
+data$life_span[is.na(data$life_span)]=mode
+X=data$body_wt
+m=mean(X)
+m
+data$non_dreaming[is.na(data$non_dreaming)]=m
+data$dreaming[is.na(data$dreaming)]=m
+data$total_sleep[is.na(data$total_sleep)]=m
+data
+var1=data$non_dreaming
+var2=data$total_sleep
+var3=data$gestation
+var4=data$exposure
